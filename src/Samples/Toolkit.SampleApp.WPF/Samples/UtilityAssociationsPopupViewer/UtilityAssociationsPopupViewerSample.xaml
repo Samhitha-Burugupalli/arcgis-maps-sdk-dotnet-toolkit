@@ -1,0 +1,232 @@
+﻿<UserControl x:Class="Esri.ArcGISRuntime.Toolkit.Samples.PopupViewer.UtilityAssociationsPopupViewerSample"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:esri="http://schemas.esri.com/arcgis/runtime/2013"
+             xmlns:calcite="http://schemas.esri.com/calcite/2024"
+             xmlns:sample="clr-namespace:Esri.ArcGISRuntime.Toolkit.Samples.PopupViewer"
+             mc:Ignorable="d"
+             d:DesignHeight="300"
+             d:DesignWidth="600">
+    <UserControl.Resources>
+        <sample:VisibilityConverter x:Key="VisibilityConverter" />
+        <sample:StringConverter x:Key="StringConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="500" />
+        </Grid.ColumnDefinitions>
+        <esri:MapView x:Name="mapView"
+                      Map="https://rt-nautilus115.esri.com/portal/home/item.html?id=5775f430201e4a409afb6430780b55ac"
+                      GeoViewTapped="mapView_GeoViewTapped" />
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition MaxHeight="850" />
+            </Grid.RowDefinitions>
+            <ListView x:Name="AssociationsPopupElement"
+                      Visibility="{Binding ElementName=AssociationsPopupElement, Path=ItemsSource, Converter={StaticResource VisibilityConverter}}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="{Binding Title}"
+                                       FontSize="14"
+                                       FontWeight="Bold" />
+                            <TextBlock Text="{Binding Description}"
+                                       FontSize="12"
+                                       Grid.Row="1" />
+                            <ListView Grid.Row="2"
+                                      ItemsSource="{Binding AssociationsFilterResults}">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid MouseUp="OnFilterExpand">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Filter.Title}" />
+                                                <TextBlock Text="{Binding  Filter.Description}"
+                                                           Grid.Row="1" />
+                                                <TextBlock Text="{Binding ResultCount}"
+                                                           Grid.Column="1" />
+                                                <Image Source="{calcite:CalciteIconImage Icon=ChevronRight, Brush=Black}"
+                                                       Width="32"
+                                                       Height="32"
+                                                       Grid.Column="2" />
+                                            </Grid>
+                                            <Grid Visibility="{Binding Converter={StaticResource VisibilityConverter}}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Image Source="{calcite:CalciteIconImage Icon=ExclamationMarkTriangle, Brush=Red}"
+                                                       Width="32"
+                                                       Height="32" />
+                                                <TextBlock Text="No associations were found"
+                                                           Grid.Column="1" />
+                                            </Grid>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Grid Visibility="Collapsed"
+                  x:Name="GroupResultGrid">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Image Source="{calcite:CalciteIconImage Icon=ChevronLeft, Brush=Black}"
+                       Width="32"
+                       Height="32"
+                       MouseUp="OnBack"
+                       VerticalAlignment="Center"
+                       Grid.RowSpan="2" />
+                <Image Source="{calcite:CalciteIconImage Icon=MoveUp,Brush=Black}"
+                       Width="32"
+                       Height="32"
+                       MouseUp="OnExitAssociations"
+                       VerticalAlignment="Center"
+                       Grid.Column="1"
+                       Grid.RowSpan="2" />
+                <TextBlock Text="{Binding Filter.Title}"
+                           Grid.Column="2" />
+                <TextBlock Text="{Binding  Filter.Description}"
+                           Grid.Row="1"
+                           Grid.Column="2" />
+                <Image Source="{calcite:CalciteIconImage Icon=X, Brush=Black}"
+                       Width="32"
+                       Height="32"
+                       MouseUp="OnClosePopup"
+                       VerticalAlignment="Center"
+                       Grid.Column="3"
+                       Grid.RowSpan="2" />
+                <ListView ItemsSource="{Binding GroupResults}"
+                          Grid.ColumnSpan="4"
+                          Grid.Row="1">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <TextBlock Text="Test" />
+                                <!--<Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Image Source="{calcite:CalciteIconImage Icon=ChevronDown, Brush=Black}"
+                                       Width="32"
+                                       Height="32"
+                                       MouseUp="OnGroupCollapse"
+                                       x:Name="GroupCollapse"
+                                       VerticalAlignment="Center" />
+                                <Image Source="{calcite:CalciteIconImage Icon=ChevronRight, Brush=Black}"
+                                       Width="32"
+                                       Height="32"
+                                       MouseUp="OnGroupExpand"
+                                       Visibility="{Binding ElementName=GroupCollapse, Path=Visibility,Converter={StaticResource}, ConverterParameter=Inverse}"
+                                       VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding Name}"
+                                           Grid.Column="1" />
+                                <Ellipse Fill="LightGray"
+                                         Width="32"
+                                         Height="32"
+                                         Grid.Column="2" />
+                                -->
+                                <!--"{Binding Converter={StaticResource StringConverter}}"-->
+                                <!--
+                                <TextBlock Text="1"
+                                           Grid.Column="2" />-->
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <ListView ItemsSource="{Binding AssociationResults}"
+                          Grid.ColumnSpan="4"
+                          Grid.Row="2">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid  Visibility="{Binding Association, Converter={StaticResource VisibilityConverter}}">
+                                    <Image Source="{calcite:CalciteIconImage Icon=ConnectionEndLeft, Brush=Black}"
+                                           Width="32"
+                                           Height="32"
+                                           Grid.RowSpan="2"
+                                           Visibility="{Binding Association, Converter={StaticResource VisibilityConverter}, ConverterParameter=ConnectionEndLeft}"
+                                           VerticalAlignment="Center" />
+                                    <Image Source="{calcite:CalciteIconImage Icon=ConnectionEndRight, Brush=Black}"
+                                           Width="32"
+                                           Height="32"
+                                           Grid.RowSpan="2"
+                                           Visibility="{Binding Association, Converter={StaticResource VisibilityConverter}, ConverterParameter=ConnectionEndRight}"
+                                           VerticalAlignment="Center" />
+                                    <Image Source="{calcite:CalciteIconImage Icon=ConnectionMiddle, Brush=Black}"
+                                           Width="32"
+                                           Height="32"
+                                           Grid.RowSpan="2"
+                                           Visibility="{Binding Association, Converter={StaticResource VisibilityConverter}, ConverterParameter=ConnectionMiddle}"
+                                           VerticalAlignment="Center" />
+                                    <Image Source="{calcite:CalciteIconImage Icon=ConnectionToConnection, Brush=Black}"
+                                           Width="32"
+                                           Height="32"
+                                           Grid.RowSpan="2"
+                                           Visibility="{Binding Association, Converter={StaticResource VisibilityConverter}, ConverterParameter=ConnectionToConnection}"
+                                           VerticalAlignment="Center" />
+                                </Grid>
+                                <TextBlock Text="{Binding Filter.Title}"
+                                           Grid.Column="1" />
+                                <TextBlock Text="{Binding  Filter.Description}"
+                                           Grid.Row="1"
+                                           Grid.Column="1" />
+                                <Image Source="{calcite:CalciteIconImage Icon=ChevronRight, Brush=Black}"
+                                       Width="32"
+                                       Height="32"
+                                       Grid.RowSpan="2"
+                                       Grid.Column="2"
+                                       MouseUp="OnAssociatedFeatureExpand"
+                                       VerticalAlignment="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+            <esri:PopupViewer x:Name="popupViewer"
+                              Margin="5"
+                              Grid.Row="1"
+                              PopupAttachmentClicked="popupViewer_PopupAttachmentClicked"
+                              HyperlinkClicked="popupViewer_LinkClicked" />
+        </Grid>
+    </Grid>
+</UserControl>
